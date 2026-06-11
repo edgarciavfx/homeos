@@ -17,4 +17,9 @@ test.describe("Chore Workflow", () => {
     const link = page.locator('nav a:has-text("Chores")');
     await expect(link).toBeVisible();
   });
+
+  test("dashboard page redirects unauthenticated users", async ({ page }) => {
+    await page.goto("/dashboard");
+    await expect(page).toHaveURL(/\/login/);
+  });
 });

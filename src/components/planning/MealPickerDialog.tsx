@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMealLibrary } from "@/hooks/use-meals";
 
 interface MealPickerDialogProps {
@@ -30,9 +31,9 @@ export function MealPickerDialog({ householdId, onSelect, onClose }: MealPickerD
         ) : !data || data.meals.length === 0 ? (
           <p className="py-4 text-center text-sm text-neutral-500">
             No meals found.{" "}
-            <a href="/meals/create" className="underline">
+            <Link href="/meals/create" className="underline">
               Create one
-            </a>
+            </Link>
           </p>
         ) : (
           <div className="max-h-64 space-y-1 overflow-y-auto">

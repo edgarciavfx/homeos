@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from "vitest";
 import { CreateBudgetService } from "@/application/budgets/create-budget.service";
 import { BudgetRepository } from "@/infrastructure/repositories/budget.repository";
 import { HouseholdMemberRepository } from "@/infrastructure/repositories/household-member.repository";
+import { Prisma } from "@prisma/client";
 import { ValidationError, ForbiddenError } from "@/lib/api/api-error";
 
 vi.mock("@/infrastructure/prisma/transaction-manager", () => ({
@@ -14,7 +15,7 @@ describe("CreateBudgetService", () => {
     householdId: "hh-1",
     month: 6,
     year: 2026,
-    amount: 500,
+    amount: new Prisma.Decimal(500),
     deletedAt: null,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -30,7 +31,7 @@ describe("CreateBudgetService", () => {
       userId: "user-1",
       role: "OWNER",
     } as never);
-    vi.spyOn(budgetRepo, "create").mockResolvedValue(mockBudget);
+    vi.spyOn(budgetRepo, "create").mockResolvedValue(mockBudget as never);
 
     const service = new CreateBudgetService(budgetRepo, memberRepo);
     const result = await service.execute({
@@ -52,7 +53,13 @@ describe("CreateBudgetService", () => {
     const service = new CreateBudgetService(budgetRepo, memberRepo);
 
     await expect(
-      service.execute({ householdId: "hh-1", userId: "user-1", month: 13, year: 2026, amount: 500 }),
+      service.execute({
+        householdId: "hh-1",
+        userId: "user-1",
+        month: 13,
+        year: 2026,
+        amount: 500,
+      }),
     ).rejects.toThrow(ValidationError);
   });
 

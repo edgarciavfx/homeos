@@ -3,6 +3,7 @@ import { RecordPurchaseService } from "@/application/budgets/record-purchase.ser
 import { PurchaseRepository } from "@/infrastructure/repositories/purchase.repository";
 import { BudgetRepository } from "@/infrastructure/repositories/budget.repository";
 import { HouseholdMemberRepository } from "@/infrastructure/repositories/household-member.repository";
+import { Prisma } from "@prisma/client";
 import { ValidationError, NotFoundError, ForbiddenError } from "@/lib/api/api-error";
 
 vi.mock("@/infrastructure/prisma/transaction-manager", () => ({
@@ -15,7 +16,7 @@ describe("RecordPurchaseService", () => {
     householdId: "hh-1",
     month: 6,
     year: 2026,
-    amount: 500,
+    amount: new Prisma.Decimal(500),
     deletedAt: null,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -26,7 +27,7 @@ describe("RecordPurchaseService", () => {
     const budgetRepo = new BudgetRepository();
     const memberRepo = new HouseholdMemberRepository();
 
-    vi.spyOn(budgetRepo, "findById").mockResolvedValue(mockBudget);
+    vi.spyOn(budgetRepo, "findById").mockResolvedValue(mockBudget as never);
     vi.spyOn(memberRepo, "findByUserAndHousehold").mockResolvedValue({
       id: "mem-1",
       householdId: "hh-1",
@@ -37,10 +38,10 @@ describe("RecordPurchaseService", () => {
       id: "purchase-1",
       householdId: "hh-1",
       budgetId: "budget-1",
-      amount: 50,
+      amount: new Prisma.Decimal(50),
       purchaseDate: new Date("2026-06-10"),
       notes: "Groceries",
-    });
+    } as never);
 
     const service = new RecordPurchaseService(purchaseRepo, budgetRepo, memberRepo);
     const result = await service.execute({
@@ -96,7 +97,7 @@ describe("RecordPurchaseService", () => {
     const budgetRepo = new BudgetRepository();
     const memberRepo = new HouseholdMemberRepository();
 
-    vi.spyOn(budgetRepo, "findById").mockResolvedValue(mockBudget);
+    vi.spyOn(budgetRepo, "findById").mockResolvedValue(mockBudget as never);
     vi.spyOn(memberRepo, "findByUserAndHousehold").mockResolvedValue(null);
 
     const service = new RecordPurchaseService(purchaseRepo, budgetRepo, memberRepo);

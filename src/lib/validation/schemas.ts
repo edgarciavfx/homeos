@@ -32,19 +32,25 @@ export const CreateWeeklyPlanSchema = z.object({
 export const CreatePrioritySchema = z.object({
   title: z.string().min(1).max(200),
   description: z.string().optional(),
-  ownerId: z.string().uuid().optional(),
-  targetDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  ownerId: z.string().optional(),
+  targetDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
 });
 
 export const UpdatePrioritySchema = z.object({
   title: z.string().min(1).max(200).optional(),
   description: z.string().optional(),
-  ownerId: z.string().uuid().optional(),
-  targetDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  ownerId: z.string().optional(),
+  targetDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
 });
 
 export const ScheduleMealSchema = z.object({
-  mealId: z.string().uuid(),
+  mealId: z.string(),
   scheduledDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
 });
 
@@ -63,14 +69,14 @@ export const UpdateGroceryItemSchema = z.object({
 export const CreateChoreSchema = z.object({
   name: z.string().min(1),
   frequency: z.enum(["DAILY", "WEEKLY", "BIWEEKLY", "MONTHLY"]),
-  ownerId: z.string().uuid().optional(),
+  ownerId: z.string().optional(),
 });
 
 export const UpdateChoreSchema = z.object({
   name: z.string().min(1).optional(),
   frequency: z.enum(["DAILY", "WEEKLY", "BIWEEKLY", "MONTHLY"]).optional(),
   active: z.boolean().optional(),
-  ownerId: z.string().uuid().optional(),
+  ownerId: z.string().optional(),
 });
 
 export const CreateBudgetSchema = z.object({
@@ -91,5 +97,5 @@ export const UpdateHouseholdSchema = z.object({
 
 export const AssignOwnershipSchema = z.object({
   areaName: z.string().min(1),
-  ownerId: z.string().uuid(),
+  ownerId: z.string(),
 });
