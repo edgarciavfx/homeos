@@ -1,9 +1,16 @@
-import typescriptEslint from "typescript-eslint";
+import typescriptParser from "@typescript-eslint/parser";
 import nextPlugin from "@next/eslint-plugin-next";
 
-export default typescriptEslint.config(
-  ...typescriptEslint.configs.recommended,
+export default [
   {
+    languageOptions: {
+      parser: typescriptParser,
+      parserOptions: {
+        ecmaFeatures: { jsx: true },
+        ecmaVersion: "latest",
+        sourceType: "module",
+      },
+    },
     plugins: {
       "@next/next": nextPlugin,
     },
@@ -15,4 +22,4 @@ export default typescriptEslint.config(
   {
     ignores: [".next/**"],
   },
-);
+];
