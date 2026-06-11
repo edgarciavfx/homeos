@@ -86,6 +86,68 @@ describe("Planning API Integration", () => {
     expect(scheduled?.mealId).toBe(meal.id);
   });
 
+  it("includes overdue chores, upcoming deadlines, and ownership assignments in recommendations (BR-013/BR-014/BR-015)", async () => {
+    const user = await createTestUser(prisma);
+    const { household } = await createTestHousehold(prisma, { ownerId: user.id });
+
+    const chore = await prisma.chore.create({
+      data: { householdId: household.id, name: "Mop Floors", frequency: "WEEKLY" },
+    });
+
+    await prisma.choreOccurrence.create({
+      data: {
+        choreId: chore.id,
+        dueDate: new Date("2026-01-01"),
+        completedAt: null,
+      },
+    });
+
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    await prisma.choreOccurrence.create({
+      data: {
+        choreId: chore.id,
+        dueDate: tomorrow,
+        completedAt: null,
+        completedBy: user.id,
+      },
+    });
+
+    await prisma.ownershipAssignment.create({
+      data: { householdId: household.id, areaName: "Kitchen", ownerId: user.id },
+    });
+
+    const service = new GenerateWeeklyPlanService(
+      new WeeklyPlanRepository(),
+      new WeeklyPriorityRepository(),
+      new ChoreOccurrenceRepository(),
+      new OwnershipRepository(),
+      new BudgetRepository(),
+      new HouseholdMemberRepository(),
+    );
+
+    const weekStart = new Date();
+    weekStart.setDate(weekStart.getDate() + 14);
+    const weekStartStr = weekStart.toISOString().split("T")[0];
+
+    const result = await service.execute({
+      householdId: household.id,
+      userId: user.id,
+      weekStartDate: weekStartStr,
+    });
+
+    const titles = result.priorities.map((p) => p.title);
+    expect(titles).toContain("Mop Floors");
+    expect(titles).toContain("Responsibility: Kitchen");
+    expect(result.priorities.length).toBeGreaterThanOrEqual(3);
+
+    const plans = await prisma.weeklyPriority.findMany({
+      where: { weeklyPlanId: result.weeklyPlanId },
+    });
+    expect(plans.length).toBeGreaterThanOrEqual(3);
+  });
+
   it("creates and completes a priority", async () => {
     const user = await createTestUser(prisma);
     const { household } = await createTestHousehold(prisma, { ownerId: user.id });
