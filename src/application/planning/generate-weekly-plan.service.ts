@@ -5,7 +5,10 @@ import { OwnershipRepository } from "@/infrastructure/repositories/ownership.rep
 import { BudgetRepository } from "@/infrastructure/repositories/budget.repository";
 import { HouseholdMemberRepository } from "@/infrastructure/repositories/household-member.repository";
 import { transaction } from "@/infrastructure/prisma/transaction-manager";
-import { scorePriorities, PriorityInput } from "@/infrastructure/recommendations/recommendation-engine";
+import {
+  scorePriorities,
+  PriorityInput,
+} from "@/infrastructure/recommendations/recommendation-engine";
 import { CreateWeeklyPlanSchema } from "@/lib/validation/schemas";
 import { ValidationError, ForbiddenError, ConflictError } from "@/lib/api/api-error";
 import { parseDate, getWeekStartDate } from "@/lib/dates/date-utils";
@@ -68,9 +71,7 @@ export class GenerateWeeklyPlanService {
       this.budgetRepository.findCurrent(input.householdId),
     ]);
 
-    const isBudgetExceeded = budget
-      ? Number(budget.amount) <= 0
-      : false;
+    const isBudgetExceeded = budget ? Number(budget.amount) <= 0 : false;
 
     const priorityInputs: PriorityInput[] = [
       ...overdueChores.map((c) => ({
@@ -90,6 +91,15 @@ export class GenerateWeeklyPlanService {
         isBudgetExceeded: false,
         suggestedOwnerId: c.completedBy ?? undefined,
         suggestedDate: c.dueDate,
+      })),
+      ...ownerships.map((o) => ({
+        title: `Responsibility: ${o.areaName}`,
+        isOverdue: false,
+        isDueSoon: true,
+        isUnassigned: !o.ownerId,
+        isBudgetExceeded: false,
+        suggestedOwnerId: o.ownerId,
+        suggestedDate: undefined,
       })),
     ];
 
