@@ -47,7 +47,7 @@ jobs:
         run: npm run lint
 
       - name: Type Check
-        run: npx tsc --noEmit
+        run: npm run typecheck
 
       - name: Unit Tests
         run: npm run test:unit
@@ -56,6 +56,11 @@ jobs:
 
       - name: Integration Tests
         run: npm run test:integration
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/homeos_test
+
+      - name: Performance Tests
+        run: npm run test:perf
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/homeos_test
 

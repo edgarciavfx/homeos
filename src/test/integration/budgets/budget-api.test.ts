@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeAll } from "vitest";
+import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import { createTestDb } from "@/test/utils/test-db";
 import { createTestUser } from "@/test/factories/user.factory";
 import { createTestHousehold } from "@/test/factories/household.factory";
@@ -16,7 +16,7 @@ describe("Budget API Integration", () => {
 
     const budget = await prisma.budget.create({
       data: {
-        householdId: household.id,
+        householdId: household.household.id,
         month: 6,
         year: 2026,
         amount: 1000,
@@ -25,7 +25,7 @@ describe("Budget API Integration", () => {
 
     expect(budget).toBeDefined();
     expect(budget.amount.toString()).toBe("1000");
-    expect(budget.householdId).toBe(household.id);
+    expect(budget.householdId).toBe(household.household.id);
 
     const found = await prisma.budget.findUnique({ where: { id: budget.id } });
     expect(found).not.toBeNull();
@@ -38,7 +38,7 @@ describe("Budget API Integration", () => {
 
     const budget = await prisma.budget.create({
       data: {
-        householdId: household.id,
+        householdId: household.household.id,
         month: 6,
         year: 2026,
         amount: 500,
@@ -47,9 +47,9 @@ describe("Budget API Integration", () => {
 
     const purchase = await prisma.purchase.create({
       data: {
-        householdId: household.id,
+        householdId: household.household.id,
         budgetId: budget.id,
-        amount: 75.50,
+        amount: 75.5,
         purchaseDate: new Date("2026-06-10"),
         notes: "Test purchase",
       },
@@ -72,7 +72,7 @@ describe("Budget API Integration", () => {
 
     const budget = await prisma.budget.create({
       data: {
-        householdId: household.id,
+        householdId: household.household.id,
         month: 6,
         year: 2026,
         amount: 1000,
@@ -81,8 +81,18 @@ describe("Budget API Integration", () => {
 
     await prisma.purchase.createMany({
       data: [
-        { householdId: household.id, budgetId: budget.id, amount: 200, purchaseDate: new Date() },
-        { householdId: household.id, budgetId: budget.id, amount: 150, purchaseDate: new Date() },
+        {
+          householdId: household.household.id,
+          budgetId: budget.id,
+          amount: 200,
+          purchaseDate: new Date(),
+        },
+        {
+          householdId: household.household.id,
+          budgetId: budget.id,
+          amount: 150,
+          purchaseDate: new Date(),
+        },
       ],
     });
 
