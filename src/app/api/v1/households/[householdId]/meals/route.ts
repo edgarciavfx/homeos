@@ -13,7 +13,7 @@ const createMealService = new CreateMealService(
 export const GET = protectedRoute(async (req, { params }) => {
   const { householdId } = await params;
   const { searchParams } = new URL(req.url);
-  const archived = searchParams.get("archived") === "true" ? false : undefined;
+  const archived = searchParams.get("archived") === "true" ? true : undefined;
   const page = Number(searchParams.get("page") ?? 1);
   const pageSize = Number(searchParams.get("pageSize") ?? 20);
   const repo = new MealRepository();

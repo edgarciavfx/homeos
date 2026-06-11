@@ -3,6 +3,11 @@ import { protectedRoute } from "@/lib/api/api-handler";
 import { ok } from "@/lib/api/api-response";
 import { NotFoundError } from "@/lib/api/api-error";
 import { MealRepository } from "@/infrastructure/repositories/meal.repository";
+import { UpdateMealService } from "@/application/meals/update-meal.service";
+import { ArchiveMealService } from "@/application/meals/archive-meal.service";
+
+const updateMealService = new UpdateMealService(new MealRepository());
+const archiveMealService = new ArchiveMealService(new MealRepository());
 
 export const GET = protectedRoute(async (_req, { params }) => {
   const { mealId } = await params;
@@ -17,8 +22,8 @@ export const GET = protectedRoute(async (_req, { params }) => {
 export const PATCH = protectedRoute(async (req, { params }) => {
   const { mealId } = await params;
   const body = await req.json();
-  const repo = new MealRepository();
-  const result = await repo.update(mealId, {
+  const result = await updateMealService.execute({
+    mealId,
     name: body.name,
     preparationMinutes: body.preparationMinutes,
   });
@@ -27,7 +32,6 @@ export const PATCH = protectedRoute(async (req, { params }) => {
 
 export const DELETE = protectedRoute(async (_req, { params }) => {
   const { mealId } = await params;
-  const repo = new MealRepository();
-  await repo.archive(mealId);
-  return ok({ archived: true });
+  const result = await archiveMealService.execute(mealId);
+  return ok(result);
 });

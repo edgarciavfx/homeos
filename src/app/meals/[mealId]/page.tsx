@@ -3,12 +3,14 @@
 import { use } from "react";
 import { useRouter } from "next/navigation";
 import { useMeal } from "@/hooks/use-meals";
+import { useHousehold } from "@/components/household-context-provider";
 import { MealForm } from "@/components/meals/meal-form";
 import { IngredientEditor } from "@/components/meals/ingredient-editor";
 
 export default function EditMealPage({ params }: { params: Promise<{ mealId: string }> }) {
   const { mealId } = use(params);
   const router = useRouter();
+  const { householdId } = useHousehold();
   const { data: meal, isLoading, error } = useMeal(mealId);
 
   if (isLoading) {
@@ -39,7 +41,7 @@ export default function EditMealPage({ params }: { params: Promise<{ mealId: str
 
       <div className="max-w-md rounded-lg border p-6">
         <MealForm
-          householdId=""
+          householdId={householdId ?? ""}
           initialValues={{
             mealId: meal.id,
             name: meal.name,

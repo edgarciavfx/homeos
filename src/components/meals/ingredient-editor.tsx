@@ -17,6 +17,9 @@ export function IngredientEditor({ mealId, ingredients }: IngredientEditorProps)
   const [quantity, setQuantity] = useState("");
   const [unit, setUnit] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editQuantity, setEditQuantity] = useState("");
+  const [editUnit, setEditUnit] = useState("");
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,12 +35,20 @@ export function IngredientEditor({ mealId, ingredients }: IngredientEditorProps)
     setUnit("");
   };
 
-  const handleUpdate = async (ingredient: IngredientView) => {
+  const startEditing = (ingredient: IngredientView) => {
+    setEditingId(ingredient.id);
+    setEditName(ingredient.name);
+    setEditQuantity(String(ingredient.quantity));
+    setEditUnit(ingredient.unit);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingId || !editName.trim() || !editQuantity || !editUnit.trim()) return;
     await updateIngredient.mutateAsync({
-      ingredientId: ingredient.id,
-      name: ingredient.name,
-      quantity: ingredient.quantity,
-      unit: ingredient.unit,
+      ingredientId: editingId,
+      name: editName.trim(),
+      quantity: Number(editQuantity),
+      unit: editUnit.trim(),
     });
     setEditingId(null);
   };
@@ -65,41 +76,23 @@ export function IngredientEditor({ mealId, ingredients }: IngredientEditorProps)
                 <div className="flex flex-1 items-center gap-2">
                   <input
                     type="text"
-                    value={ingredient.name}
-                    onChange={(e) => {
-                      const updated = ingredients.map((i) =>
-                        i.id === ingredient.id ? { ...i, name: e.target.value } : i,
-                      );
-                      const found = updated.find((i) => i.id === ingredient.id);
-                      if (found) handleUpdate(found);
-                    }}
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
                     className="w-28 rounded border px-2 py-1 text-sm"
                   />
                   <span className="text-neutral-400">x</span>
                   <input
                     type="number"
-                    value={ingredient.quantity}
-                    onChange={(e) => {
-                      const updated = ingredients.map((i) =>
-                        i.id === ingredient.id ? { ...i, quantity: Number(e.target.value) } : i,
-                      );
-                      const found = updated.find((i) => i.id === ingredient.id);
-                      if (found) handleUpdate(found);
-                    }}
+                    value={editQuantity}
+                    onChange={(e) => setEditQuantity(e.target.value)}
                     className="w-20 rounded border px-2 py-1 text-sm"
                     step="0.25"
                     min="0.01"
                   />
                   <input
                     type="text"
-                    value={ingredient.unit}
-                    onChange={(e) => {
-                      const updated = ingredients.map((i) =>
-                        i.id === ingredient.id ? { ...i, unit: e.target.value } : i,
-                      );
-                      const found = updated.find((i) => i.id === ingredient.id);
-                      if (found) handleUpdate(found);
-                    }}
+                    value={editUnit}
+                    onChange={(e) => setEditUnit(e.target.value)}
                     className="w-20 rounded border px-2 py-1 text-sm"
                   />
                 </div>
@@ -111,7 +104,9 @@ export function IngredientEditor({ mealId, ingredients }: IngredientEditorProps)
               <div className="flex items-center gap-2">
                 <button
                   onClick={() =>
-                    setEditingId(editingId === ingredient.id ? null : ingredient.id)
+                    editingId === ingredient.id
+                      ? handleSaveEdit()
+                      : startEditing(ingredient)
                   }
                   className="text-xs text-neutral-600 hover:text-neutral-900"
                 >
