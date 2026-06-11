@@ -85,6 +85,10 @@ export const RecordPurchaseSchema = z.object({
   notes: z.string().optional(),
 });
 
+export const UpdateHouseholdSchema = z.object({
+  name: z.string().min(2).max(100),
+});
+
 export const AssignOwnershipSchema = z.object({
   areaName: z.string().min(1),
   ownerId: z.string().uuid(),
