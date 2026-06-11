@@ -1,0 +1,338 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum HouseholdRole {
+  OWNER
+  MEMBER
+}
+
+enum ChoreFrequency {
+  DAILY
+  WEEKLY
+  BIWEEKLY
+  MONTHLY
+}
+
+enum WeeklyPlanStatus {
+  DRAFT
+  APPROVED
+}
+
+enum GroceryItemSource {
+  GENERATED
+  MANUAL
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts         Account[]
+  sessions         Session[]
+  memberships      HouseholdMember[]
+  ownedHouseholds  Household[]         @relation("HouseholdOwner")
+  ownedChores      ChoreOccurrence[]   @relation("ChoreOwner")
+  ownershipAreas   OwnershipAssignment[]
+  assignedPriorities WeeklyPriority[]
+}
+
+model Household {
+  id        String    @id @default(uuid())
+  name      String
+  ownerId   String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  owner   User   @relation("HouseholdOwner", fields: [ownerId], references: [id])
+  members HouseholdMember[]
+
+  invitations        Invitation[]
+  ownershipAreas     OwnershipAssignment[]
+  weeklyPlans        WeeklyPlan[]
+  meals              Meal[]
+  groceryLists       GroceryList[]
+  chores             Chore[]
+  budgets            Budget[]
+  purchases          Purchase[]
+
+  @@index([createdAt])
+  @@index([ownerId])
+}
+
+model HouseholdMember {
+  id          String        @id @default(uuid())
+  householdId String
+  userId      String
+  role        HouseholdRole
+  joinedAt    DateTime      @default(now())
+
+  household Household @relation(fields: [householdId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
+
+  @@unique([householdId, userId])
+  @@index([householdId])
+  @@index([userId])
+}
+
+model Invitation {
+  id          String   @id @default(uuid())
+  householdId String
+  email       String
+  token       String   @unique
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  createdAt   DateTime @default(now())
+
+  household Household @relation(fields: [householdId], references: [id])
+
+  @@index([householdId])
+  @@index([token])
+}
+
+model OwnershipAssignment {
+  id          String   @id @default(uuid())
+  householdId String
+  areaName    String
+  ownerId     String
+  assignedAt  DateTime @default(now())
+
+  household Household @relation(fields: [householdId], references: [id])
+  owner     User      @relation(fields: [ownerId], references: [id])
+
+  @@unique([householdId, areaName])
+  @@index([householdId])
+  @@index([ownerId])
+}
+
+model WeeklyPlan {
+  id            String           @id @default(uuid())
+  householdId   String
+  weekStartDate DateTime
+  status        WeeklyPlanStatus @default(DRAFT)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  deletedAt     DateTime?
+
+  household Household @relation(fields: [householdId], references: [id])
+
+  priorities     WeeklyPriority[]
+  scheduledMeals ScheduledMeal[]
+  groceryLists   GroceryList[]
+
+  @@unique([householdId, weekStartDate])
+  @@index([householdId, status])
+  @@index([householdId, weekStartDate])
+}
+
+model WeeklyPriority {
+  id          String   @id @default(uuid())
+  weeklyPlanId String
+  title       String
+  description String?
+  ownerId     String?
+  targetDate  DateTime?
+  completed   Boolean  @default(false)
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+
+  weeklyPlan WeeklyPlan @relation(fields: [weeklyPlanId], references: [id])
+  owner      User?      @relation(fields: [ownerId], references: [id])
+
+  @@index([weeklyPlanId, completed])
+  @@index([ownerId, completed])
+}
+
+model Meal {
+  id                 String          @id @default(uuid())
+  householdId        String
+  name               String
+  preparationMinutes Int
+  archived           Boolean         @default(false)
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  deletedAt          DateTime?
+
+  household Household @relation(fields: [householdId], references: [id])
+
+  ingredients    MealIngredient[]
+  scheduledMeals ScheduledMeal[]
+
+  @@unique([householdId, name])
+  @@index([householdId, archived])
+}
+
+model MealIngredient {
+  id     String @id @default(uuid())
+  mealId String
+  name   String
+  quantity Decimal
+  unit   String
+
+  meal Meal @relation(fields: [mealId], references: [id])
+
+  @@index([mealId])
+}
+
+model ScheduledMeal {
+  id           String   @id @default(uuid())
+  weeklyPlanId String
+  mealId       String
+  scheduledDate DateTime
+
+  weeklyPlan WeeklyPlan @relation(fields: [weeklyPlanId], references: [id])
+  meal       Meal       @relation(fields: [mealId], references: [id])
+
+  @@unique([weeklyPlanId, mealId, scheduledDate])
+  @@index([weeklyPlanId])
+  @@index([mealId])
+}
+
+model GroceryList {
+  id          String   @id @default(uuid())
+  householdId String
+  weeklyPlanId String
+  generatedAt DateTime @default(now())
+
+  household  Household  @relation(fields: [householdId], references: [id])
+  weeklyPlan WeeklyPlan @relation(fields: [weeklyPlanId], references: [id])
+
+  items GroceryItem[]
+
+  @@unique([weeklyPlanId])
+  @@index([householdId, generatedAt])
+}
+
+model GroceryItem {
+  id            String           @id @default(uuid())
+  groceryListId String
+  name          String
+  quantity      Decimal?
+  unit          String?
+  category      String?
+  completed     Boolean          @default(false)
+  source        GroceryItemSource @default(GENERATED)
+  createdAt     DateTime         @default(now())
+
+  groceryList GroceryList @relation(fields: [groceryListId], references: [id])
+
+  @@index([groceryListId, completed])
+  @@index([source])
+}
+
+model Chore {
+  id        String    @id @default(uuid())
+  householdId String
+  name      String
+  frequency ChoreFrequency
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  household Household @relation(fields: [householdId], references: [id])
+
+  occurrences ChoreOccurrence[]
+
+  @@index([householdId, active])
+}
+
+model ChoreOccurrence {
+  id          String    @id @default(uuid())
+  choreId     String
+  dueDate     DateTime
+  completedAt DateTime?
+  completedBy String?
+  createdAt   DateTime  @default(now())
+
+  chore     Chore @relation(fields: [choreId], references: [id])
+  completedByUser User? @relation("ChoreOwner", fields: [completedBy], references: [id])
+
+  @@index([dueDate])
+  @@index([completedAt])
+  @@index([choreId, dueDate])
+}
+
+model Budget {
+  id          String   @id @default(uuid())
+  householdId String
+  month       Int
+  year        Int
+  amount      Decimal
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+
+  household Household @relation(fields: [householdId], references: [id])
+
+  purchases Purchase[]
+
+  @@unique([householdId, month, year])
+  @@index([householdId, year, month])
+}
+
+model Purchase {
+  id           String   @id @default(uuid())
+  householdId  String
+  budgetId     String
+  amount       Decimal
+  purchaseDate DateTime
+  notes        String?
+  createdAt    DateTime @default(now())
+
+  household Household @relation(fields: [householdId], references: [id])
+  budget    Budget    @relation(fields: [budgetId], references: [id])
+
+  @@index([householdId])
+  @@index([budgetId])
+  @@index([purchaseDate])
+  @@index([householdId, purchaseDate(sort: Desc)])
+  @@index([householdId, budgetId])
+}
