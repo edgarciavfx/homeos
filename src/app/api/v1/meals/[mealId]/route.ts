@@ -3,6 +3,16 @@ import { protectedRoute } from "@/lib/api/api-handler";
 import { ok } from "@/lib/api/api-response";
 import { MealRepository } from "@/infrastructure/repositories/meal.repository";
 
+export const GET = protectedRoute(async (_req, { params }) => {
+  const { mealId } = await params;
+  const repo = new MealRepository();
+  const meal = await repo.findById(mealId);
+  if (!meal) {
+    return Response.json({ error: "Not found" }, { status: 404 });
+  }
+  return ok(meal);
+});
+
 export const PATCH = protectedRoute(async (req, { params }) => {
   const { mealId } = await params;
   const body = await req.json();
