@@ -1,7 +1,18 @@
 import { NextRequest } from "next/server";
 import { protectedRoute } from "@/lib/api/api-handler";
 import { ok } from "@/lib/api/api-response";
+import { NotFoundError } from "@/lib/api/api-error";
 import { MealRepository } from "@/infrastructure/repositories/meal.repository";
+
+export const GET = protectedRoute(async (_req, { params }) => {
+  const { mealId } = await params;
+  const repo = new MealRepository();
+  const meal = await repo.findById(mealId);
+  if (!meal) {
+    throw new NotFoundError("Meal not found");
+  }
+  return ok(meal);
+});
 
 export const PATCH = protectedRoute(async (req, { params }) => {
   const { mealId } = await params;
