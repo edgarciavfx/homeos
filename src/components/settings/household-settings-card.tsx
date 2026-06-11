@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useHousehold, useRenameHousehold } from "@/hooks/use-households";
+import { useHousehold as useHouseholdCtx } from "@/components/household-context-provider";
 
 interface HouseholdSettingsCardProps {
   householdId: string;
@@ -9,9 +10,12 @@ interface HouseholdSettingsCardProps {
 
 export function HouseholdSettingsCard({ householdId }: HouseholdSettingsCardProps) {
   const { data: household, isLoading } = useHousehold(householdId);
+  const { role } = useHouseholdCtx();
   const renameMutation = useRenameHousehold();
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState("");
+
+  const canEdit = role === "OWNER";
 
   if (isLoading) {
     return (
@@ -62,15 +66,17 @@ export function HouseholdSettingsCard({ householdId }: HouseholdSettingsCardProp
               {household.memberCount} member{household.memberCount !== 1 ? "s" : ""}
             </p>
           </div>
-          <button
-            onClick={() => {
-              setName(household.name);
-              setIsEditing(true);
-            }}
-            className="text-sm text-neutral-600 hover:text-neutral-900"
-          >
-            Rename
-          </button>
+          {canEdit && (
+            <button
+              onClick={() => {
+                setName(household.name);
+                setIsEditing(true);
+              }}
+              className="text-sm text-neutral-600 hover:text-neutral-900"
+            >
+              Rename
+            </button>
+          )}
         </div>
       )}
     </div>

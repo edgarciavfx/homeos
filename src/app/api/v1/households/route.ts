@@ -22,7 +22,6 @@ export const POST = protectedRoute(async (req, { userId }) => {
 export const GET = protectedRoute(async (_req, { userId }) => {
   const repo = new HouseholdRepository();
   const memberships = await repo.findMembership(userId);
-  const owned = await repo.findByOwnerId(userId);
   const households = memberships.map((m) => ({
     id: m.household.id,
     name: m.household.name,
