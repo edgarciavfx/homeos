@@ -72,11 +72,14 @@ export class GetDashboardSummaryQuery {
         dueDate: c.dueDate,
       })),
       budgetSnapshot: budget
-        ? {
-            amount: Number(budget.amount),
-            spent: 0,
-            remaining: Number(budget.amount),
-          }
+        ? (() => {
+            const spent = budget.purchases.reduce((sum, p) => sum + Number(p.amount), 0);
+            return {
+              amount: Number(budget.amount),
+              spent,
+              remaining: Number(budget.amount) - spent,
+            };
+          })()
         : null,
     };
   }
