@@ -19,6 +19,8 @@
     "test:e2e": "playwright test",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
+    "db:test:start": "docker run -d --name homeos-test-db -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=homeos_test -p 5432:5432 postgres:16-alpine && sleep 2 && DATABASE_URL=postgresql://postgres:postgres@localhost:5432/homeos_test prisma migrate deploy",
+    "db:test:stop": "docker stop homeos-test-db && docker rm homeos-test-db",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
