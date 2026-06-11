@@ -14,16 +14,13 @@ export function AppShell({ children }: AppShellProps) {
               HomeOS
             </Link>
             <nav className="hidden items-center gap-4 sm:flex">
-              <Link
-                href="/meals"
-                className="text-sm text-neutral-600 hover:text-neutral-900"
-              >
+              <Link href="/planning" className="text-sm text-neutral-600 hover:text-neutral-900">
+                Planning
+              </Link>
+              <Link href="/meals" className="text-sm text-neutral-600 hover:text-neutral-900">
                 Meals
               </Link>
-              <Link
-                href="/settings"
-                className="text-sm text-neutral-600 hover:text-neutral-900"
-              >
+              <Link href="/settings" className="text-sm text-neutral-600 hover:text-neutral-900">
                 Settings
               </Link>
             </nav>
