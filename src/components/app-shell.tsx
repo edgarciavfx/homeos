@@ -20,6 +20,9 @@ export function AppShell({ children }: AppShellProps) {
               <Link href="/meals" className="text-sm text-neutral-600 hover:text-neutral-900">
                 Meals
               </Link>
+              <Link href="/groceries" className="text-sm text-neutral-600 hover:text-neutral-900">
+                Groceries
+              </Link>
               <Link href="/settings" className="text-sm text-neutral-600 hover:text-neutral-900">
                 Settings
               </Link>
