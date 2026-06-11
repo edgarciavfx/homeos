@@ -43,9 +43,9 @@ export class InviteMemberService {
 
     authorize(membership.role as HouseholdRole, Permission.MEMBER_INVITE);
 
-    const existingMember = await this.memberRepository.findByUserAndHousehold(
-      input.invitedByUserId,
+    const existingMember = await this.memberRepository.findByHouseholdAndEmail(
       input.householdId,
+      input.email,
     );
     if (existingMember) {
       throw new ConflictError("User is already a member");

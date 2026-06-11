@@ -24,6 +24,12 @@ export class HouseholdMemberRepository {
     return client.householdMember.create({ data });
   }
 
+  async findByHouseholdAndEmail(householdId: string, email: string) {
+    return prisma.householdMember.findFirst({
+      where: { householdId, user: { email } },
+    });
+  }
+
   async countByHousehold(householdId: string) {
     return prisma.householdMember.count({ where: { householdId } });
   }
