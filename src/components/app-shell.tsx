@@ -23,6 +23,9 @@ export function AppShell({ children }: AppShellProps) {
               <Link href="/groceries" className="text-sm text-neutral-600 hover:text-neutral-900">
                 Groceries
               </Link>
+              <Link href="/chores" className="text-sm text-neutral-600 hover:text-neutral-900">
+                Chores
+              </Link>
               <Link href="/settings" className="text-sm text-neutral-600 hover:text-neutral-900">
                 Settings
               </Link>
