@@ -3,7 +3,6 @@ import { CreateHouseholdService } from "@/application/households/create-househol
 import { HouseholdRepository } from "@/infrastructure/repositories/household.repository";
 import { HouseholdMemberRepository } from "@/infrastructure/repositories/household-member.repository";
 import { ValidationError } from "@/lib/api/api-error";
-import { transaction } from "@/infrastructure/prisma/transaction-manager";
 
 vi.mock("@/infrastructure/prisma/transaction-manager", () => ({
   transaction: vi.fn((fn) => fn({})),

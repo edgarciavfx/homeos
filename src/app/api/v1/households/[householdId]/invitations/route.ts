@@ -1,4 +1,3 @@
-import { NextRequest } from "next/server";
 import { protectedRoute } from "@/lib/api/api-handler";
 import { ok, created } from "@/lib/api/api-response";
 import { ForbiddenError } from "@/lib/api/api-error";

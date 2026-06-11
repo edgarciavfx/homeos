@@ -4,7 +4,6 @@ import { HouseholdMemberRepository } from "@/infrastructure/repositories/househo
 import { InvitationRepository } from "@/infrastructure/repositories/invitation.repository";
 import { NoopEmailProvider } from "@/infrastructure/email/email-provider";
 import { ValidationError, ForbiddenError, ConflictError } from "@/lib/api/api-error";
-import { transaction } from "@/infrastructure/prisma/transaction-manager";
 
 vi.mock("@/infrastructure/prisma/transaction-manager", () => ({
   transaction: vi.fn((fn) => fn({})),

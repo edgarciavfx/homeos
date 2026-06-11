@@ -3,7 +3,6 @@ import { AcceptInvitationService } from "@/application/households/accept-invitat
 import { InvitationRepository } from "@/infrastructure/repositories/invitation.repository";
 import { HouseholdMemberRepository } from "@/infrastructure/repositories/household-member.repository";
 import { NotFoundError, ConflictError } from "@/lib/api/api-error";
-import { transaction } from "@/infrastructure/prisma/transaction-manager";
 
 vi.mock("@/infrastructure/prisma/transaction-manager", () => ({
   transaction: vi.fn((fn) => fn({})),
